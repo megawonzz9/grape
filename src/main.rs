@@ -1,4 +1,5 @@
 use colored::*;
+use owo_colors::OwoColorize;
 use regex::Regex;
 use std::env::args;
 use std::error::Error;
@@ -42,10 +43,13 @@ fn with_file(line: &[&str]) -> Result<(), Box<dyn Error>> {
         let filename = line_f[filez + 1];
         let filef = File::open(filename)?;
         let reader = BufReader::new(filef);
-        for (line_number, line) in reader.lines().enumerate() {
+        for (line_num, line) in reader.lines().enumerate() {
             let line = line?;
             if args.iter().all(|arg| line.contains(arg)) {
-                println!("{}: {}", line_number + 1, &line);
+                let (result, matched) = search_optimized(&line, &args, None);
+                if matched {
+                    println!("{}: {}", line_num.cyan(), result);
+                }
             }
         }
     } else {
@@ -62,7 +66,7 @@ fn piped(line: &[&str]) -> Result<(), Box<dyn Error>> {
         if keywords.iter().any(|kw| line.contains(kw)) {
             let (result, matched) = search_optimized(&line, keywords, None);
             if matched {
-                println!("{}: {}", line_num, result);
+                println!("{}: {}", line_num.cyan(), result);
             }
         }
     }
@@ -80,7 +84,7 @@ fn no_case(line: &[&str]) -> Result<(), Box<dyn Error>> {
         {
             let (result, matched) = search_optimized(&line, keywords, Some(1));
             if matched {
-                println!("{}: {}", line_num, result);
+                println!("{}: {}", line_num.cyan(), result);
             }
         }
     }
